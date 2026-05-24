@@ -42,6 +42,7 @@ export name=${name:-''}
 export oap=${oap:-''}
 export cert_domain=${cert_domain:-''}
 export cf_token=${cf_token:-''}
+export acme_email=${acme_email:-''}
 v46url="https://icanhazip.com"
 agsbxurl="https://raw.githubusercontent.com/axe528/argosbx/main/argosbx.sh"
 showmode(){
@@ -669,17 +670,7 @@ cat >> "$HOME/agsbx/sb.json" <<EOF
                   "password":"${uuid}"
                 }
             ],
-            "padding_scheme":[
-                stop=8
-                0=30-30
-                1=100-400
-                2=400-500,c,500-1000,c,500-1000,c,500-1000,c,500-1000
-                3=9-9,500-1000
-                4=500-1000
-                5=500-1000
-                6=500-1000
-                7=500-1000
-            ],
+            "padding_scheme":[],
             "tls":{
                 "enabled": true,
                 "server_name": "${TLS_SNI}",
@@ -2227,8 +2218,8 @@ echo "Clash/Mihomo本地IP订阅地址：http://$suburl/clmi.yaml"
 echo "Sing-box本地IP订阅地址：http://$suburl/sbox.json"
 echo "聚合协议本地IP订阅地址：http://$suburl/jhsub.txt"
 echo "**********************************************************"
-fi
-fi
+菲
+菲
 echo
 echo "---------------------------------------------------------"
 echo "聚合节点信息，请进入 $HOME/agsbx/jhsub.txt 文件目录查看或者运行 cat $HOME/agsbx/jhsub.txt 查看"
@@ -2426,20 +2417,20 @@ rm /tmp/crontab.tmp
 fi
 echo "本地IP订阅链接已更新完成"
 fi
-if [ -n "$hyjpt" ] && [ -n "$hyp" ]; then
-echo
+if [ -n "$hyjpt" ] && [ -n "$hyp" ];然后 [ -n "$hyjpt" ] && [ -n "$hyp" ]; then
+回声
 echo "设置Hysteria2协议的跳跃端口：$hyjpt"
 iptables -t nat -F PREROUTING >/dev/null 2>&1
 ip6tables -t nat -F PREROUTING >/dev/null 2>&1
 hyport=$(cat "$HOME/agsbx/port_hy2")
 for port in $hyjpt; do
-iptables -t nat -A PREROUTING -p udp --dport "$port" -j DNAT --to-destination :$hyport
-ip6tables -t nat -A PREROUTING -p udp --dport "$port" -j DNAT --to-destination :$hyport
+iptables -t nat -A PREROUTING -p udp --dport "$port" -j DNAT --至-目的地 :$hyport
+ip6tables -t nat -A PREROUTING -p udp --dport "$port" -j DNAT --至-目的地 :$hyport
 done
-netfilter-persistent save >/dev/null 2>&1
+netfilter-持久保存 >/dev/null 2>&1
 if command -v rc-service >/dev/null 2>&1; then
-rc-update show default 2>/dev/null | grep -q 'iptables' || rc-update add iptables >/dev/null 2>&1
-rc-update show default 2>/dev/null | grep -q 'ip6tables' || rc-update add ip6tables >/dev/null 2>&1
+rc-update 显示默认 2>/dev/null | grep -q 'iptables' || rc-update 添加 iptables >/dev/null 2>&1
+rc-update 显示默认 2>/dev/null | grep -q 'ip6tables' || rc-update 添加 ip6tables >/dev/null 2>&1
 rc-service iptables save >/dev/null 2>&1
 rc-service ip6tables save >/dev/null 2>&1
 fi
@@ -2455,3 +2446,5 @@ echo "相关快捷方式如下："
 showmode
 exit
 fi
+
+
