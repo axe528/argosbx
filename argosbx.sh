@@ -205,43 +205,68 @@ echo "✅ 自签证书配置完成，客户端需设置 skip-cert-verify: true"
 apply_real_certificate(){
 echo
 echo "开始申请 Let's Encrypt 证书..."
+
+if [ -z "$acme_email" ]; then
+if [ -t 0 ]; then
+printf "请输入用于 Let's Encrypt/acme.sh 的邮箱："
+read -r acme_email
+fi
+fi
+
+if [ -z "$acme_email" ]; then
+acme_email="acme@example.com"
+fi
+
+echo "证书申请邮箱：$acme_email"
+
 if [ ! -f "$HOME/.acme.sh/acme.sh" ]; then
 echo "安装 acme.sh..."
 if command -v curl >/dev/null 2>&1; then
-curl -s https://get.acme.sh | sh -s email=acme@example.com >/dev/null 2>&1
+curl -s https://get.acme.sh | sh -s email="$acme_email" >/dev/null 2>&1
 elif command -v wget >/dev/null 2>&1; then
-wget -qO- https://get.acme.sh | sh -s email=acme@example.com >/dev/null 2>&1
+wget -qO- https://get.acme.sh | sh -s email="$acme_email" >/dev/null 2>&1
 else
 echo "❌ 未找到 curl 或 wget，无法安装 acme.sh，回退到自签证书"
 apply_self_signed_certificate
 return 1
 fi
 fi
+
 if [ -f "$HOME/.acme.sh/acme.sh.env" ]; then
 . "$HOME/.acme.sh/acme.sh.env"
 else
 export PATH="$HOME/.acme.sh:$PATH"
 fi
+
 if ! command -v acme.sh >/dev/null 2>&1 && [ ! -f "$HOME/.acme.sh/acme.sh" ]; then
 echo "❌ acme.sh 安装失败，回退到自签证书"
 apply_self_signed_certificate
 return 1
 fi
+
 ACMESH="$HOME/.acme.sh/acme.sh"
 export CF_Token="$cf_token"
+
+"$ACMESH" --set-default-ca --server letsencrypt >/dev/null 2>&1
+"$ACMESH" --register-account -m "$acme_email" --server letsencrypt >/dev/null 2>&1
+
 echo "正在通过 Cloudflare DNS 验证申请证书，请稍候（约30秒）..."
+
 if "$ACMESH" --issue --dns dns_cf \
 -d "$cert_domain" \
 --keylength ec-256 \
 --server letsencrypt \
 --force >/dev/null 2>&1; then
+
 "$ACMESH" --install-cert -d "$cert_domain" --ecc \
 --key-file "$HOME/agsbx/private.key" \
 --fullchain-file "$HOME/agsbx/cert.pem" \
 --reloadcmd "pkill -HUP sing-box 2>/dev/null; pkill -HUP xray 2>/dev/null" >/dev/null 2>&1
+
 if [ -f "$HOME/agsbx/cert.pem" ] && [ -f "$HOME/agsbx/private.key" ]; then
 echo "✅ Let's Encrypt 证书申请成功"
 echo "域名：$cert_domain"
+echo "邮箱：$acme_email"
 echo "有效期：90天（acme.sh 自动续期）"
 echo "$cert_domain" > "$HOME/agsbx/cert_domain"
 echo "real" > "$HOME/agsbx/cert_type"
@@ -253,6 +278,7 @@ echo "❌ 证书文件安装失败，回退到自签证书"
 apply_self_signed_certificate
 return 1
 fi
+
 else
 echo "❌ 证书申请失败，可能原因："
 echo "   1. Cloudflare API Token 权限不足（需要 Zone-DNS-Edit）"
@@ -2218,8 +2244,8 @@ echo "Clash/Mihomo本地IP订阅地址：http://$suburl/clmi.yaml"
 echo "Sing-box本地IP订阅地址：http://$suburl/sbox.json"
 echo "聚合协议本地IP订阅地址：http://$suburl/jhsub.txt"
 echo "**********************************************************"
-菲
-菲
+fi
+fi
 echo
 echo "---------------------------------------------------------"
 echo "聚合节点信息，请进入 $HOME/agsbx/jhsub.txt 文件目录查看或者运行 cat $HOME/agsbx/jhsub.txt 查看"
@@ -2417,20 +2443,20 @@ rm /tmp/crontab.tmp
 fi
 echo "本地IP订阅链接已更新完成"
 fi
-if [ -n "$hyjpt" ] && [ -n "$hyp" ];然后 [ -n "$hyjpt" ] && [ -n "$hyp" ]; then
-回声
+if [ -n "$hyjpt" ] && [ -n "$hyp" ]; then
+echo
 echo "设置Hysteria2协议的跳跃端口：$hyjpt"
 iptables -t nat -F PREROUTING >/dev/null 2>&1
 ip6tables -t nat -F PREROUTING >/dev/null 2>&1
 hyport=$(cat "$HOME/agsbx/port_hy2")
 for port in $hyjpt; do
-iptables -t nat -A PREROUTING -p udp --dport "$port" -j DNAT --至-目的地 :$hyport
-ip6tables -t nat -A PREROUTING -p udp --dport "$port" -j DNAT --至-目的地 :$hyport
+iptables -t nat -A PREROUTING -p udp --dport "$port" -j DNAT --to-destination :$hyport
+ip6tables -t nat -A PREROUTING -p udp --dport "$port" -j DNAT --to-destination :$hyport
 done
-netfilter-持久保存 >/dev/null 2>&1
+netfilter-persistent save >/dev/null 2>&1
 if command -v rc-service >/dev/null 2>&1; then
-rc-update 显示默认 2>/dev/null | grep -q 'iptables' || rc-update 添加 iptables >/dev/null 2>&1
-rc-update 显示默认 2>/dev/null | grep -q 'ip6tables' || rc-update 添加 ip6tables >/dev/null 2>&1
+rc-update show default 2>/dev/null | grep -q 'iptables' || rc-update add iptables >/dev/null 2>&1
+rc-update show default 2>/dev/null | grep -q 'ip6tables' || rc-update add ip6tables >/dev/null 2>&1
 rc-service iptables save >/dev/null 2>&1
 rc-service ip6tables save >/dev/null 2>&1
 fi
